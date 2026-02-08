@@ -1,0 +1,36 @@
+#!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Minecraft Server Finish Script
+# Handles graceful shutdown and exit codes
+# ==============================================================================
+
+# Exit codes:
+# $1 = exit code of the dying service
+# $2 = signal number (if killed by signal)
+# 256 = killed by signal
+
+exit_code="${1:-1}"
+signal_code="${2:-0}"
+
+if [ "${exit_code}" -eq 0 ]; then
+  bashio::log.info "[minecraft] Server stopped with exit code: ${exit_code}"
+else
+  bashio::log.error "[minecraft] Server stopped with exit code: ${exit_code}"
+fi
+
+# Normal exit
+if [ "${exit_code}" -eq 0 ]; then
+  echo 0 > /run/s6-linux-init-container-results/exitcode
+
+# Killed by signal
+elif [ "${exit_code}" -eq 256 ]; then
+  echo $((128 + signal_code)) > /run/s6-linux-init-container-results/exitcode
+
+# Any other exit code
+else
+  echo "${exit_code}" > /run/s6-linux-init-container-results/exitcode
+fi
+
+# Halt the container
+/run/s6/basedir/bin/halt

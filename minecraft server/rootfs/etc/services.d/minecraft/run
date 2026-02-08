@@ -1,0 +1,135 @@
+#!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Minecraft Server Run Script
+# ==============================================================================
+set -e
+
+bashio::log.info "Starting Minecraft Server..."
+
+# ==============================================================================
+# Check EULA acceptance
+# ==============================================================================
+bashio::log.info "DEBUG: Reading EULA config..."
+EULA=$(bashio::config 'eula')
+bashio::log.info "DEBUG: EULA value is: '${EULA}'"
+
+if ! bashio::var.true "${EULA}"; then
+    bashio::log.fatal ""
+    bashio::log.fatal "You must accept the Minecraft EULA to run this server."
+    bashio::log.fatal "Please set 'eula: true' in the addon configuration."
+    bashio::log.fatal "DEBUG: Received EULA='${EULA}' (expected 'true' or 'True' or 1)"
+    bashio::log.fatal ""
+    bashio::log.fatal "Read the EULA at: https://aka.ms/MinecraftEULA"
+    bashio::log.fatal ""
+    bashio::exit.nok "EULA not accepted"
+fi
+
+# ==============================================================================
+# Prepare data directory
+# ==============================================================================
+DATA_DIR="/data"
+mkdir -p "${DATA_DIR}"
+
+# ==============================================================================
+# Export configuration as environment variables for itzg/minecraft-server
+# ==============================================================================
+export EULA="TRUE"
+
+# Server type and version
+export TYPE=$(bashio::config 'server_type')
+export VERSION=$(bashio::config 'minecraft_version')
+
+# Modrinth modpack configuration (if using MODRINTH server type)
+if [ "${TYPE}" = "MODRINTH" ]; then
+    MODRINTH_MODPACK=$(bashio::config 'modrinth_modpack')
+    if bashio::var.has_value "${MODRINTH_MODPACK}"; then
+        export MODRINTH_MODPACK="${MODRINTH_MODPACK}"
+    else
+        bashio::log.error "MODRINTH_MODPACK is required when using server type MODRINTH"
+        bashio::exit.nok "Please set the modpack name/ID"
+    fi
+    
+    # Only export if provided by user - let itzg use its defaults otherwise
+    MODRINTH_VERSION_TYPE=$(bashio::config 'modrinth_version_type')
+    if bashio::var.has_value "${MODRINTH_VERSION_TYPE}"; then
+        export MODRINTH_MODPACK_VERSION_TYPE="${MODRINTH_VERSION_TYPE}"
+    fi
+    
+    MODRINTH_LOADER=$(bashio::config 'modrinth_loader')
+    if bashio::var.has_value "${MODRINTH_LOADER}"; then
+        export MODRINTH_LOADER="${MODRINTH_LOADER}"
+    fi
+fi
+
+# Memory settings
+MEMORY_MIN=$(bashio::config 'memory_min')
+MEMORY_MAX=$(bashio::config 'memory_max')
+export MEMORY="${MEMORY_MAX}M"
+export INIT_MEMORY="${MEMORY_MIN}M"
+
+# Server properties
+export SERVER_NAME=$(bashio::config 'server_name')
+export MOTD="${SERVER_NAME}"
+export MODE=$(bashio::config 'gamemode')
+export DIFFICULTY=$(bashio::config 'difficulty')
+export MAX_PLAYERS=$(bashio::config 'max_players')
+export ALLOW_NETHER=$(bashio::config 'allow_nether')
+export ALLOW_FLIGHT=$(bashio::config 'allow_flight')
+export PVP=$(bashio::config 'pvp')
+export VIEW_DISTANCE=$(bashio::config 'view_distance')
+
+# World settings
+export LEVEL=$(bashio::config 'level_name')
+LEVEL_SEED=$(bashio::config 'level_seed')
+if bashio::var.has_value "${LEVEL_SEED}"; then
+    export SEED="${LEVEL_SEED}"
+fi
+export LEVEL_TYPE=$(bashio::config 'level_type')
+
+# Additional settings
+export ONLINE_MODE=$(bashio::config 'online_mode')
+export ENABLE_COMMAND_BLOCK=$(bashio::config 'enable_command_block')
+
+# JVM options (if provided)
+JVM_OPTS=$(bashio::config 'jvm_opts')
+if bashio::var.has_value "${JVM_OPTS}"; then
+    export JVM_OPTS="${JVM_OPTS}"
+fi
+
+# Server port (always 25565 internally)
+export SERVER_PORT="25565"
+
+# ==============================================================================
+# Display configuration
+# ==============================================================================
+bashio::log.info "─────────────────────────────────────"
+bashio::log.info "  Minecraft Server Configuration"
+bashio::log.info "─────────────────────────────────────"
+bashio::log.info "Server Type    : ${TYPE}"
+
+if [ "${TYPE}" = "MODRINTH" ]; then
+    bashio::log.info "Modpack        : ${MODRINTH_MODPACK}"
+    bashio::log.info "Version Type   : ${MODRINTH_MODPACK_VERSION_TYPE}"
+    bashio::log.info "Mod Loader     : ${MODRINTH_LOADER}"
+else
+    bashio::log.info "Version        : ${VERSION}"
+fi
+
+bashio::log.info "Memory         : ${MEMORY_MIN}M - ${MEMORY_MAX}M"
+bashio::log.info "Server Name    : ${SERVER_NAME}"
+bashio::log.info "Gamemode       : ${MODE}"
+bashio::log.info "Difficulty     : ${DIFFICULTY}"
+bashio::log.info "Max Players    : ${MAX_PLAYERS}"
+bashio::log.info "World          : ${LEVEL}"
+bashio::log.info "Port           : ${SERVER_PORT}"
+bashio::log.info "─────────────────────────────────────"
+
+# ==============================================================================
+# Start the Minecraft server
+# ==============================================================================
+bashio::log.info "Launching Minecraft server..."
+bashio::log.info "This may take several minutes on first start..."
+
+# The itzg image has its own startup script at /start
+exec /start

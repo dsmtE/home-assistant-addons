@@ -1,0 +1,71 @@
+name: Minecraft Server (Java Edition)
+version: "1.0.0"
+slug: minecraft-server-java
+description: Minecraft Java Edition server with mod support
+arch:
+  - amd64
+  - aarch64
+init: false
+startup: application
+boot: auto
+ports:
+  25565/tcp: 25565
+ports_description:
+  25565/tcp: Minecraft server port
+map:
+  - addon_config:/data:rw
+options:
+  # Server type: VANILLA, PAPER, SPIGOT, PURPUR, FORGE, FABRIC, QUILT, or MODRINTH
+  server_type: VANILLA
+  # Minecraft version (LATEST or specific like 1.20.4)
+  minecraft_version: LATEST
+  # Modrinth modpack configuration (only for MODRINTH server type)
+  modrinth_modpack: ""
+  modrinth_version_type: release
+  modrinth_loader: fabric
+  # Memory settings
+  memory_min: 1024
+  memory_max: 4096
+  # Server properties
+  server_name: "Minecraft Server"
+  gamemode: survival
+  difficulty: normal
+  max_players: 20
+  allow_nether: true
+  allow_flight: false
+  pvp: true
+  view_distance: 10
+  # World settings
+  level_name: world
+  level_seed: ""
+  level_type: default
+  # Performance
+  online_mode: true
+  enable_command_block: false
+  # Additional JVM arguments (optional)
+  jvm_opts: ""
+  # EULA acceptance (must be true to run)
+  eula: false
+schema:
+  server_type: list(VANILLA|PAPER|SPIGOT|PURPUR|FORGE|FABRIC|QUILT|MODRINTH)
+  minecraft_version: str
+  modrinth_modpack: str?
+  modrinth_version_type: list(release|beta|alpha)?
+  modrinth_loader: list(forge|fabric|quilt)?
+  memory_min: int(512,16384)
+  memory_max: int(1024,32768)
+  server_name: str
+  gamemode: list(survival|creative|adventure|spectator)
+  difficulty: list(peaceful|easy|normal|hard)
+  max_players: int(1,100)
+  allow_nether: bool
+  allow_flight: bool
+  pvp: bool
+  view_distance: int(3,32)
+  level_name: str
+  level_seed: str?
+  level_type: list(default|flat|largeBiomes|amplified|buffet)
+  online_mode: bool
+  enable_command_block: bool
+  jvm_opts: str?
+  eula: bool

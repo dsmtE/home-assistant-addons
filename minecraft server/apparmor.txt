@@ -1,0 +1,40 @@
+#include <tunables/global>
+
+profile minecraft-server-java flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  # Capabilities
+  capability,
+  file,
+  signal (send) set=(kill,term,int,hup,cont),
+
+  # S6-Overlay
+  /init ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+  /usr/lib/bashio/** ix,
+  /etc/services.d/** rwix,
+  /etc/cont-init.d/** rwix,
+  /run/** mrwkl,
+  /var/run/** mrwkl,
+
+  # Bashio
+  /usr/lib/bashio/** ix,
+  /usr/bin/bashio ix,
+  /tmp/** rwk,
+
+  # Data access
+  /data/** mrwklix,
+
+  # Java and Minecraft server
+  /usr/lib/jvm/** ix,
+  /usr/bin/java ix,
+
+  # Allow server to read its own files
+  / r,
+  /proc/ r,
+  /proc/cpuinfo r,
+  /proc/meminfo r,
+  /proc/sys/kernel/random/uuid r,
+  /sys/devices/system/cpu/** r,
+}
