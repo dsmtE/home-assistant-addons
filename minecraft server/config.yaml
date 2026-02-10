@@ -1,5 +1,5 @@
 name: Minecraft Server (Java Edition)
-version: "1.0.0"
+version: "1.0.2"
 slug: minecraft-server-java
 description: Minecraft Java Edition server with mod support
 arch:
@@ -8,6 +8,7 @@ arch:
 init: false
 startup: application
 boot: auto
+host_network: true
 ports:
   25565/tcp: 25565
 ports_description:

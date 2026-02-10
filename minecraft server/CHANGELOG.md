@@ -1,3 +1,8 @@
+## 1.0.2
+
+- Added `host_network: true` to config for proper network connectivity
+- Only install needed additional packages (xz-utils)
+
 ## 1.0.1
 
 - Added Modrinth modpack support

@@ -14,19 +14,16 @@ ENV \
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ##################
-# Install base packages
+# Install required packages
 ##################
 ARG BUILD_ARCH
 ARG BASHIO_VERSION
 ARG S6_OVERLAY_VERSION
 
+# Install xz-utils (required for s6-overlay extraction)
+# Base image has bash, ca-certificates, curl, jq already
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        bash \
-        ca-certificates \
-        curl \
-        jq \
-        xz-utils \
+    && apt-get install -y --no-install-recommends xz-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
