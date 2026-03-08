@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Map `/data` to `/addons_config` folder for easier configuration management of the server files
+
 ## 1.0.2
 
 - Added `host_network: true` to config for proper network connectivity
