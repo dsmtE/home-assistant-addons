@@ -65,6 +65,10 @@ fi
 # Memory settings
 MEMORY_MIN=$(bashio::config 'memory_min')
 MEMORY_MAX=$(bashio::config 'memory_max')
+if [ "${MEMORY_MIN}" -gt "${MEMORY_MAX}" ]; then
+    bashio::log.fatal "memory_min (${MEMORY_MIN}M) cannot be greater than memory_max (${MEMORY_MAX}M)"
+    bashio::exit.nok "Invalid memory configuration"
+fi
 export MEMORY="${MEMORY_MAX}M"
 export INIT_MEMORY="${MEMORY_MIN}M"
 
