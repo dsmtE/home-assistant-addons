@@ -91,6 +91,22 @@ export LEVEL_TYPE=$(bashio::config 'level_type')
 export ONLINE_MODE=$(bashio::config 'online_mode')
 export ENABLE_COMMAND_BLOCK=$(bashio::config 'enable_command_block')
 
+# IPv6 support (dual-stack binding: enables IPv6 without disabling IPv4)
+if bashio::var.true "$(bashio::config 'prefer_ipv6')"; then
+    export PREFER_IPV6="true"
+fi
+
+# Whitelist (optional, comma-separated usernames)
+if bashio::var.has_value "$(bashio::config 'whitelist')"; then
+    export WHITELIST=$(bashio::config 'whitelist')
+fi
+
+# Security warning for public-facing cracked servers
+if ! bashio::var.true "$(bashio::config 'online_mode')" && ! bashio::var.has_value "$(bashio::config 'whitelist')"; then
+    bashio::log.warning "online_mode is OFF and no whitelist is set — your server is open to anyone"
+    bashio::log.warning "Set the 'whitelist' option to restrict who can join"
+fi
+
 # JVM options (if provided)
 JVM_OPTS=$(bashio::config 'jvm_opts')
 if bashio::var.has_value "${JVM_OPTS}"; then
@@ -123,6 +139,13 @@ bashio::log.info "Difficulty     : ${DIFFICULTY}"
 bashio::log.info "Max Players    : ${MAX_PLAYERS}"
 bashio::log.info "World          : ${LEVEL}"
 bashio::log.info "Port           : ${SERVER_PORT}"
+bashio::log.info "IPv6 Support   : $(bashio::config 'prefer_ipv6')"
+WHITELIST_LOG=$(bashio::config 'whitelist')
+if bashio::var.has_value "${WHITELIST_LOG}"; then
+    bashio::log.info "Whitelist      : ${WHITELIST_LOG}"
+else
+    bashio::log.info "Whitelist      : disabled"
+fi
 bashio::log.info "─────────────────────────────────────"
 
 # ==============================================================================
