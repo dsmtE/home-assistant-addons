@@ -10,15 +10,12 @@ bashio::log.info "Starting Minecraft Server..."
 # ==============================================================================
 # Check EULA acceptance
 # ==============================================================================
-bashio::log.info "DEBUG: Reading EULA config..."
 EULA=$(bashio::config 'eula')
-bashio::log.info "DEBUG: EULA value is: '${EULA}'"
 
 if ! bashio::var.true "${EULA}"; then
     bashio::log.fatal ""
     bashio::log.fatal "You must accept the Minecraft EULA to run this server."
     bashio::log.fatal "Please set 'eula: true' in the addon configuration."
-    bashio::log.fatal "DEBUG: Received EULA='${EULA}' (expected 'true' or 'True' or 1)"
     bashio::log.fatal ""
     bashio::log.fatal "Read the EULA at: https://aka.ms/MinecraftEULA"
     bashio::log.fatal ""
