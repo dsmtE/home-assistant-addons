@@ -1,6 +1,6 @@
 build_from:
-  amd64: itzg/minecraft-server:latest
-  aarch64: itzg/minecraft-server:latest
+  amd64: itzg/minecraft-server:2026.9.0-java25
+  aarch64: itzg/minecraft-server:2026.9.0-java25
 args:
   BASHIO_VERSION: "v0.17.5"
   S6_OVERLAY_VERSION: "3.2.2.0"
