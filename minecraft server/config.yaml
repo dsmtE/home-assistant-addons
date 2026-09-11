@@ -9,10 +9,6 @@ init: false
 startup: application
 boot: auto
 host_network: true
-ports:
-  25565/tcp: 25565
-ports_description:
-  25565/tcp: Minecraft server port
 map:
   - type: data
     read_only: false
