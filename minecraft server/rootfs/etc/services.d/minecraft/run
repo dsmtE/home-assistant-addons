@@ -10,15 +10,12 @@ bashio::log.info "Starting Minecraft Server..."
 # ==============================================================================
 # Check EULA acceptance
 # ==============================================================================
-bashio::log.info "DEBUG: Reading EULA config..."
 EULA=$(bashio::config 'eula')
-bashio::log.info "DEBUG: EULA value is: '${EULA}'"
 
 if ! bashio::var.true "${EULA}"; then
     bashio::log.fatal ""
     bashio::log.fatal "You must accept the Minecraft EULA to run this server."
     bashio::log.fatal "Please set 'eula: true' in the addon configuration."
-    bashio::log.fatal "DEBUG: Received EULA='${EULA}' (expected 'true' or 'True' or 1)"
     bashio::log.fatal ""
     bashio::log.fatal "Read the EULA at: https://aka.ms/MinecraftEULA"
     bashio::log.fatal ""
@@ -65,6 +62,10 @@ fi
 # Memory settings
 MEMORY_MIN=$(bashio::config 'memory_min')
 MEMORY_MAX=$(bashio::config 'memory_max')
+if [ "${MEMORY_MIN}" -gt "${MEMORY_MAX}" ]; then
+    bashio::log.fatal "memory_min (${MEMORY_MIN}M) cannot be greater than memory_max (${MEMORY_MAX}M)"
+    bashio::exit.nok "Invalid memory configuration"
+fi
 export MEMORY="${MEMORY_MAX}M"
 export INIT_MEMORY="${MEMORY_MIN}M"
 
@@ -90,6 +91,22 @@ export LEVEL_TYPE=$(bashio::config 'level_type')
 # Additional settings
 export ONLINE_MODE=$(bashio::config 'online_mode')
 export ENABLE_COMMAND_BLOCK=$(bashio::config 'enable_command_block')
+
+# IPv6 support (dual-stack binding: enables IPv6 without disabling IPv4)
+if bashio::var.true "$(bashio::config 'prefer_ipv6')"; then
+    export PREFER_IPV6="true"
+fi
+
+# Whitelist (optional, comma-separated usernames)
+if bashio::var.has_value "$(bashio::config 'whitelist')"; then
+    export WHITELIST=$(bashio::config 'whitelist')
+fi
+
+# Security warning for public-facing cracked servers
+if ! bashio::var.true "$(bashio::config 'online_mode')" && ! bashio::var.has_value "$(bashio::config 'whitelist')"; then
+    bashio::log.warning "online_mode is OFF and no whitelist is set — your server is open to anyone"
+    bashio::log.warning "Set the 'whitelist' option to restrict who can join"
+fi
 
 # JVM options (if provided)
 JVM_OPTS=$(bashio::config 'jvm_opts')
@@ -123,6 +140,13 @@ bashio::log.info "Difficulty     : ${DIFFICULTY}"
 bashio::log.info "Max Players    : ${MAX_PLAYERS}"
 bashio::log.info "World          : ${LEVEL}"
 bashio::log.info "Port           : ${SERVER_PORT}"
+bashio::log.info "IPv6 Support   : $(bashio::config 'prefer_ipv6')"
+WHITELIST_LOG=$(bashio::config 'whitelist')
+if bashio::var.has_value "${WHITELIST_LOG}"; then
+    bashio::log.info "Whitelist      : ${WHITELIST_LOG}"
+else
+    bashio::log.info "Whitelist      : disabled"
+fi
 bashio::log.info "─────────────────────────────────────"
 
 # ==============================================================================
