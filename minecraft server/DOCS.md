@@ -22,6 +22,7 @@ Run a Minecraft Java Edition server with support for mods and plugins directly o
 - **`server_type`**: VANILLA, PAPER, SPIGOT, PURPUR, FORGE, FABRIC, QUILT, MODRINTH
 - **`minecraft_version`**: LATEST or specific version (e.g., 1.20.4)
 - **`memory_min`** / **`memory_max`**: Memory allocation in MB
+- **`prefer_ipv6`**: Bind the server **dual-stack** (IPv6 + IPv4). Enable this to host externally over IPv6 (e.g. behind CGNAT). LAN IPv4 keeps working.
 
 ### Server Properties
 
@@ -54,6 +55,7 @@ Find modpack slugs on [Modrinth](https://modrinth.com/modpacks).
 ### Advanced Options
 
 - **`online_mode`**: Verify player accounts with Mojang (set `false` for offline mode)
+- **`whitelist`**: Comma-separated Minecraft usernames allowed to join (empty = no whitelist). Highly recommended when the server is exposed to the internet.
 - **`enable_command_block`**: Allow command blocks
 - **`jvm_opts`**: Additional JVM arguments
 
@@ -61,12 +63,26 @@ Find modpack slugs on [Modrinth](https://modrinth.com/modpacks).
 
 Default port: **25565/TCP**
 
+The add-on runs on the **host network**, so it answers directly on your Home Assistant host's IP address(es) — no port mapping or in-LAN forwarding is needed.
+
 - **Local**: Connect to `<ha-ip>:25565`
-- **External**: Forward port 25565 to your Home Assistant server
+- **External (IPv6, recommended)**: Enable `prefer_ipv6`, make sure your host has a global IPv6 address, and create an **inbound rule for TCP 25565** on your router/box (with IPv6 there is no NAT/port forwarding, but the box firewall still blocks inbound by default). Players connect with a hostname or `[IPv6-address]:25565`. IPv4 on your LAN keeps working (dual-stack).
+- **External (IPv4)**: Requires a public IPv4 + classic port forwarding — not possible behind CGNAT. Use a VPN (ZeroTier/Tailscale) or an IPv6 tunnel for friends without native IPv6.
+
+**TIP — data folder visibility:** Two folders keep the server files out of the container's hidden Docker layers (same layout as [hamc-server-java](https://github.com/williamcorsel/hassio-addons/tree/main/hamc-server-java)):
+- `/data` ← mapped from the Home Assistant `addons_config` share → browseable world/mods/config at `addons_config/minecraft-server-java/`
+- `/hassio_data` ← mapped from the `data` share → additional data volume
 
 ## Data Location
 
-All server data persists at `/addon_config/minecraft-server-java/`:
+The server operates on `/data`, backed by two shares so nothing is hidden inside the container:
+
+| Container path | Backed by | Browseable at |
+|---|---|---|
+| `/data` | `addon_config` share | `addons_config/minecraft-server-java/` (File editor / Samba) |
+| `/hassio_data` | data share | `data/` (File editor / Samba) |
+
+Contents of `/data` (`addons_config/minecraft-server-java/`):
 
 ```
 world/              # World save
