@@ -1,3 +1,7 @@
+## 1.0.5
+
+- Downgraded base image to `itzg/minecraft-server:2026.9.1-java21` for compatibility
+
 ## 1.0.4
 
 - Added `prefer_ipv6` option (dual-stack IPv6/IPv4 binding) for hosting over IPv6 (e.g. behind CGNAT)

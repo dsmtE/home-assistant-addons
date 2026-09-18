@@ -4,7 +4,7 @@ Key technical decisions and considerations for building this Minecraft Java Edit
 
 ## Project Stack
 
-- **Base Image**: `itzg/minecraft-server:2026.9.0-java25` (pinned; `latest` currently also == Java 25 but moves without notice)
+- **Base Image**: `itzg/minecraft-server:2026.9.1-java21` (pinned; `latest` currently also == Java 25 but moves without notice)
 - **Process Supervisor**: S6-Overlay
 - **Config Library**: Bashio
 
@@ -119,7 +119,7 @@ This addon uses `/etc/services.d/` because:
 3. **Script Shebang**: Use `#!/usr/bin/with-contenv bashio` not `#!/bin/bash`
 4. **Script Permissions**: `chmod +x` on run and finish scripts
 5. **Exit Codes**: finish script expects 0 or 256 for normal exits
-6. **Image Tags**: Use proper Docker tags (e.g. `2026.9.0-java25`), not addon version numbers; pin the base image in `build.yaml` for reproducible builds
+6. **Image Tags**: Use proper Docker tags (e.g. `2026.9.1-java21`), not addon version numbers; pin the base image in `build.yaml` for reproducible builds
 7. **Environment Variables**: itzg expects UPPERCASE (TYPE, VERSION, MEMORY)
 8. **Optional Config**: Don't export undefined env vars, let base image use defaults
 9. **Data Mapping**: Dual mounts (as in hamc-server-java): `addon_config:rw` → `/data` (browseable at `addons_config/minecraft-server-java/` on host) and `data` → `/hassio_data`
